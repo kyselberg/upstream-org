@@ -55,6 +55,8 @@ export function KanbanBoard({ boardId, initialBoard }: KanbanBoardProps) {
 			toast.success("Columns reordered");
 		},
 		onError: (error) => {
+			// Rollback optimistic update on error
+			utils.board.getById.invalidate({ id: boardId });
 			toast.error(error.message || "Failed to reorder columns");
 		},
 	});

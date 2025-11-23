@@ -32,7 +32,13 @@ export function KanbanColumn({ column, boardId }: KanbanColumnProps) {
 		transform,
 		transition,
 		isDragging: isColumnDragging,
-	} = useSortable({ id: column.id });
+	} = useSortable({
+		id: column.id,
+		data: {
+			type: "column",
+			column,
+		},
+	});
 
 	const { setNodeRef: setDroppableRef } = useDroppable({
 		id: column.id,
