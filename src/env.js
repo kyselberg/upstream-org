@@ -14,6 +14,7 @@ export const env = createEnv({
 		// AUTH_DISCORD_ID: z.string(),
 		// AUTH_DISCORD_SECRET: z.string(),
 		DATABASE_URL: z.string().url(),
+		CLERK_WEBHOOK_SECRET: z.string().optional(),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
@@ -35,6 +36,7 @@ export const env = createEnv({
 	runtimeEnv: {
 		AUTH_SECRET: process.env.AUTH_SECRET,
 		DATABASE_URL: process.env.DATABASE_URL,
+		CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
 		NODE_ENV: process.env.NODE_ENV,
 	},
 	/**
