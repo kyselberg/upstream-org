@@ -8,7 +8,7 @@ import type { AdapterAccount } from "next-auth/adapters";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = pgTableCreator((name) => `ttt_${name}`);
+export const createTable = pgTableCreator((name) => `${name}`);
 
 // Enums
 export const userRoleEnum = pgEnum("user_role", ["admin", "member", "guest"]);
