@@ -15,6 +15,7 @@ export const env = createEnv({
 		// AUTH_DISCORD_SECRET: z.string(),
 		DATABASE_URL: z.string().url(),
 		CLERK_WEBHOOK_SECRET: z.string().optional(),
+		TELEGRAM_BOT_TOKEN: z.string().min(1),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
@@ -37,6 +38,7 @@ export const env = createEnv({
 		AUTH_SECRET: process.env.AUTH_SECRET,
 		DATABASE_URL: process.env.DATABASE_URL,
 		CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
+		TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
 		NODE_ENV: process.env.NODE_ENV,
 	},
 	/**
