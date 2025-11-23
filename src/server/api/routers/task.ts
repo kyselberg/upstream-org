@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { boardColumns, boards, tasks } from "~/server/db/schema";
+import { boardColumns, boards, taskAssignees, tasks } from "~/server/db/schema";
 
 export const taskRouter = createTRPCRouter({
   getByColumnId: protectedProcedure
@@ -184,6 +184,110 @@ export const taskRouter = createTRPCRouter({
       await ctx.db
         .delete(tasks)
         .where(and(eq(tasks.id, input.id), eq(tasks.boardId, input.boardId)));
+
+      return { success: true };
+    }),
+
+  assign: protectedProcedure
+    .input(
+      z.object({
+        taskId: z.string(),
+        userId: z.string(),
+        boardId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify board ownership
+      const [board] = await ctx.db
+        .select()
+        .from(boards)
+        .where(eq(boards.id, input.boardId))
+        .limit(1);
+
+      if (!board || board.createdBy !== ctx.session.user.id) {
+        throw new Error("Board not found or unauthorized");
+      }
+
+      // Verify task exists and belongs to board
+      const [task] = await ctx.db
+        .select()
+        .from(tasks)
+        .where(
+          and(eq(tasks.id, input.taskId), eq(tasks.boardId, input.boardId))
+        )
+        .limit(1);
+
+      if (!task) {
+        throw new Error("Task not found");
+      }
+
+      // Check if assignment already exists
+      const [existing] = await ctx.db
+        .select()
+        .from(taskAssignees)
+        .where(
+          and(
+            eq(taskAssignees.taskId, input.taskId),
+            eq(taskAssignees.userId, input.userId)
+          )
+        )
+        .limit(1);
+
+      if (existing) {
+        return { success: true, message: "User already assigned" };
+      }
+
+      // Create assignment
+      await ctx.db.insert(taskAssignees).values({
+        taskId: input.taskId,
+        userId: input.userId,
+      });
+
+      return { success: true };
+    }),
+
+  unassign: protectedProcedure
+    .input(
+      z.object({
+        taskId: z.string(),
+        userId: z.string(),
+        boardId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify board ownership
+      const [board] = await ctx.db
+        .select()
+        .from(boards)
+        .where(eq(boards.id, input.boardId))
+        .limit(1);
+
+      if (!board || board.createdBy !== ctx.session.user.id) {
+        throw new Error("Board not found or unauthorized");
+      }
+
+      // Verify task exists and belongs to board
+      const [task] = await ctx.db
+        .select()
+        .from(tasks)
+        .where(
+          and(eq(tasks.id, input.taskId), eq(tasks.boardId, input.boardId))
+        )
+        .limit(1);
+
+      if (!task) {
+        throw new Error("Task not found");
+      }
+
+      // Remove assignment
+      await ctx.db
+        .delete(taskAssignees)
+        .where(
+          and(
+            eq(taskAssignees.taskId, input.taskId),
+            eq(taskAssignees.userId, input.userId)
+          )
+        );
 
       return { success: true };
     }),
